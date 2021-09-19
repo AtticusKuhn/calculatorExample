@@ -2,7 +2,7 @@ import re
 from typing import Any, Callable, Pattern
 
 class Token:
-    def __init__(self, name: str, value: Any) -> None:
+    def __init__(self, name: str, value: str) -> None:
         self.name = name
         self.value = value
     def show(self) -> str:
@@ -27,9 +27,5 @@ class Tokenizer:
                 return returning_tokens
         return returning_tokens
 
-# tokenizer = Tokenizer({
-#     re.compile("\d+"): "digit"
-# })
-# e = tokenizer.tokenize("123e")
-# print("\n".join(list(map(lambda x :x.show(), e))))
+
             

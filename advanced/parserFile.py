@@ -1,4 +1,5 @@
-from typing import Any
+from re import escape
+from typing import Any, Callable
 from tokenizer import Token, Tokenizer
 
 
@@ -11,11 +12,8 @@ class Single(ParserHelper):
         self.s = s
     def consume(self, l: "list[Token]") -> "list[Token] | bool":
         if len(l) > 0:
-            print("l[0].name:", l[0].name)
-            print("self.s:",self.s)
             if l[0].name == self.s:
                 return l[1:]
-        print("failing to consume because l is", l)
         return False
 
 
@@ -29,20 +27,23 @@ class ParserRule:
         self.output  = output
     def doesMatch(self, inputLine: "list[Token]") -> bool:
         for param in self.parameters:
-            print("before, inputLine is", inputLine)
             t = param.consume(inputLine)
-            if not t:
+            if t is False:
                 return False
             inputLine = t
-            print("inputLine is now", inputLine)
-        print("at end, inputLine:", inputLine)
         return len(inputLine) == 0
 class AST:
-    def __init__(self, name: str, value: Any, children: "list[AST]") -> None:
+    def __init__(self, name: str, value: Token, children: "list[AST]") -> None:
         self.name = name
         self.value  = value
         self.children = children
-myRule = ParserRule(["digit", "operator", "digit"], "expression")
+    def evaluate(self, funcs:"dict[str, Callable]") -> Any:
+        if self.name not in funcs:
+            raise ValueError(f'unhandled name {self.name}')
+        evalled_children = list(map(lambda x: x.evaluate(funcs), self.children))
+        func = funcs[self.name]
+        return func(self.value, evalled_children)
+# myRule = ParserRule(["digit", "operator", "digit"], "expression")
 
 class Parser:
     def __init__(self, rules: "list[ParserRule]", tokenizer: Tokenizer) -> None:
@@ -50,27 +51,15 @@ class Parser:
         self.tokenizer = tokenizer
     def runParser(self, tokens: "list[Token]") -> AST:
         if len(tokens) == 1:
-            return AST(tokens[0].name, None, [])
-        print("runParser called with tokens", tokens)
+            return AST(tokens[0].name, tokens[0], ["e"])
         ast = None
         for t in range(len(tokens)):
             i = t+1
             for rule in self.rules:
                 test= tokens[0:i]
                 if rule.doesMatch(test):
-                    print("rule matches")
-                    print("test is",test)
-                    print("i is", i)
-                    # print("Token(name=rule.output, value=test)", Token(name=rule.output, value=test).show())
-                    # print("tokens matching", "\n".join(list(map(lambda x :x.show(), test))))
-                    # print("tokens remaining",  tokens[i:])
-                    # rest_of_tokens = tokens[i:]
-                    # if len(rest_of_tokens) == 1:
-                    #     e = rest_of_tokens[0]
-                    #     return AST(e.name, None, [])
-                    tree = AST(rule.output, None, test)
-                    # print("rest_of_tokens = ", rest_of_tokens)
-                    remaining_tokens  = [rule.output] + tokens[i:]
+                    tree = list(map(lambda x: AST(x.name, x, []), test))
+                    remaining_tokens  = [Token(name=rule.output, value="e")] + tokens[i:]
                     ast = self.runParser(remaining_tokens)
                     if ast is None: 
                         return None
