@@ -14,8 +14,6 @@ def solve(problem: str) -> int:
             accumulator =  int(str(accumulator) + character)
         elif isOperator(character):
             if(character == "+"):
-                print("going down + path, and accumulator=", accumulator)
-                print("solve(problem[index+1:]) = ",solve(problem[index+1:]))
                 accumulator += solve(problem[index+1:])
                 break
             elif(character == "-"):

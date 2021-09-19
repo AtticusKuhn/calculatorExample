@@ -51,7 +51,7 @@ class Parser:
         self.tokenizer = tokenizer
     def runParser(self, tokens: "list[Token]") -> AST:
         if len(tokens) == 1:
-            return AST(tokens[0].name, tokens[0], ["e"])
+            return AST(tokens[0].name, tokens[0], [])
         ast = None
         for t in range(len(tokens)):
             i = t+1
@@ -59,7 +59,7 @@ class Parser:
                 test= tokens[0:i]
                 if rule.doesMatch(test):
                     tree = list(map(lambda x: AST(x.name, x, []), test))
-                    remaining_tokens  = [Token(name=rule.output, value="e")] + tokens[i:]
+                    remaining_tokens  = [Token(name=rule.output, value="".join(list(map(lambda x:x.value, test))))] + tokens[i:]
                     ast = self.runParser(remaining_tokens)
                     if ast is None: 
                         return None

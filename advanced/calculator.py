@@ -3,10 +3,12 @@ from parserFile import AST
 from tokenizer import Token, Tokenizer
 from typing import List
 import re
-rule: ParserRule = ParserRule(["digit", "operator", "digit"], "expression")
+rule: ParserRule = ParserRule(["number", "operator", "number"], "expression")
+# rule: ParserRule = ParserRule(["expression"], "number")
+
 rules = [rule]
 tokenizer = Tokenizer({
-    re.compile("\d"):"digit",
+    re.compile("\d+"):"number",
     re.compile("\+"):"operator"
 
 })
@@ -17,12 +19,12 @@ def parseExpression(value:Token, children: List[AST]) -> int:
 def parseDigit(value: Token, children: List[AST]) -> str:
     return int(value.value)
 def parseOperator(value:Token, children: List[AST]) -> None:
-    return None
+    return children
 def solve(problem:str) -> int:
     result: AST = myParser.parse(problem)
     evalled = result.evaluate({
         "expression": parseExpression,
-        "digit": parseDigit,
+        "number": parseDigit,
         "operator": parseOperator
 
     })

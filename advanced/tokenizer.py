@@ -12,7 +12,7 @@ class Token:
         '''
 class Tokenizer:
     def __init__(self, tokens: "dict[Pattern[str], str]"):
-        self.tokens = tokens
+        self.tokens = tokens ## list(map(helper, tokens))
     def tokenize(self, string: str)-> "list[Token]":
         returning_tokens: "list[Token]" = []
         while len(string) > 0:
